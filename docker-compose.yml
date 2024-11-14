@@ -10,6 +10,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GUARDRAILS_TOKEN=${GUARDRAILS_TOKEN}
+      - COLLECTOR_ENDPOINT=http://phoenix:6006/v1/traces
     # Map port 8080 of the container to port 8080 on the host
     # This allows the Streamlit app to be accessed from the host machine
     ports:
@@ -25,3 +26,15 @@ services:
       interval: 3s
       timeout: 1s
       retries: 3
+    depends_on:
+      - redis
+      - phoenix
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"  # Expose port 6006 for the UI and OTLP HTTP collector
+      - "4317:4317"  # Expose port 4317 for OTLP gRPC collector
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379"
